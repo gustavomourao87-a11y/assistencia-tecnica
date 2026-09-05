@@ -55,5 +55,37 @@ def excluir_cliente(id):
     return redirect("/clientes")
 
 
+@app.route("/clientes/editar/<int:id>", methods=["GET", "POST"])
+def editar_cliente(id):
+
+    conexao = conectar()
+
+    if request.method == "POST":
+        nome = request.form["nome"]
+        telefone = request.form["telefone"]
+        email = request.form["email"]
+        endereco = request.form["endereco"]
+
+        conexao.execute("""
+            UPDATE clientes
+            SET nome = ?, telefone = ?, email = ?, endereco = ?
+            WHERE id = ?
+        """, (nome, telefone, email, endereco, id))
+
+        conexao.commit()
+        conexao.close()
+
+        return redirect("/clientes")
+
+    cliente = conexao.execute(
+        "SELECT * FROM clientes WHERE id = ?",
+        (id,)
+    ).fetchone()
+
+    conexao.close()
+
+    return render_template("editar.html", cliente=cliente)
+
+
 if __name__ == "__main__":
     app.run(debug=True)
